@@ -149,6 +149,10 @@ exports.default = function({ types: t }) {
     ExportDeclaration: path => {
       const state = path.state.ui5;
 
+      if (!path.node.declaration) {
+        return;
+      }
+
       const id = path.node.declaration.id;
       const leadingComments = path.node.leadingComments;
 
