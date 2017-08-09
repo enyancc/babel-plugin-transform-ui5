@@ -15,13 +15,13 @@
     "es6"
   ],
   "scripts": {
-    "dev": "babel src/index.js lib/index.js"
+    "dev": "babel src/index.js --watch --out-file lib/index.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sergiirocks/babel-plugin-transform-ui5.git"
   },
-  "author": "Henry Li <henry.li03@sap.com>",
+  "author": "Sergii Naumov <hello@sergii.rocks>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/sergiirocks/babel-plugin-transform-ui5/issues"
