@@ -98,11 +98,7 @@ module.exports = {
 ```
 
 ### 4. Build with Webpack
-
-
-
-## Example
-Please also take a look at [example](https://github.com/sergiirocks/babel-plugin-transform-ui5/tree/master/example),
+Please take a look at [example](https://github.com/sergiirocks/babel-plugin-transform-ui5/tree/master/example),
 you'll find the answer.
 
 
