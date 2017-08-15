@@ -1,294 +1,257 @@
-# To get the full project example, please visit [babel-plugin-ui5-example](https://github.com/MagicCube/babel-plugin-ui5-example).
-
-# babel-plugin-ui5 for Babel 6
-An UNOFFICIAL experimental Babel transformer plugin for SAP UI5.
-It allows you to develop SAP UI5 applications by using the latest [ES6](http://babeljs.io/docs/learn-es2015/), including new syntax and objective oriented programming technology.
+# babel-plugin-transform-ui5 for Babel 6
+An UNOFFICIAL Babel transform plugin for SAP UI5 modules. It transforms SAP UI5 module imports into `sap.ui.define()` format, while skips transformation for the other imports. The other imports should be handled by the packaging tool like webpack.
 
 ## Features
-+ Imports
 + Class, inheritance and `super` keyword
 + UI5's `metadata` field
 + Static methods and fields
-+ Most of ES6 features supported by Babel, like arrow functions, spreading, default value of parameters, etc.
-+ Packed up in a preset named `babel-preset-ui5` or `ui5` for short.
 
 ## Babel version
 Currently this version only supports `Babel 6`.
 
-If you still want to use Babel 5 in your project, please try my previous project [babel-ui5-plugin](https://github.com/MagicCube/babel-ui5-plugin).
+## Usage with webpack
 
-## Usage
-### 1. Install the preset
-```
-$ npm install --save-dev babel-preset-ui5
-```
-> `babel-plugin-ui5` require a bunch of plugins including `babel-preset-es2015` and `babel-plugin-syntax-class-properties`.
-
-> Although you can install `babel-plugin-ui5` and its dependencies directly,
-we strongly recommend to install via `babel-preset-ui5`.
-
-### 2. Configure .babelrc
-Add `ui5` to the `presets`.
-```json
-{
-  "presets": ["ui5"]
-}
-```
-
-## Usage with Gulp *(strongly recommended)*
-
-Suppose that in your project, all the source codes are stored in `src` folder, and all the compiled codes will later be put in `assets` folder.
+Suppose that in your project, all the source codes are stored in `app` folder.
 
 ```
 <your-ui5-project>
-    ├── <assets>
-    ├── <src>
+    ├── <app>
     │   └── <your_module>
     │       └── <sub_folder>
     │           ├── ClassA.js
     │           └── ClassB.js
     ├── .babelrc
-    ├── gulpfile.js
+    ├── webpack.config.js
     └── package.json
 ```
 
-### 1. Configure packages.json
-Make sure the `babel-preset-ui5` is in your own `package.json`.
+### 1. Install the dependencies
 ```js
 {
     ...
     "devDependencies": {
-        "babel-cli": "^6.7.5",
-        "babel-preset-ui5": "^6",
-        "del": "^2.2.0",
-        "gulp": "^3.9.1",
-        "gulp-babel": "^6.1.2",
-        "gulp-concat": "^2.6.0",
-        "gulp-rename": "^1.2.2",
-        "gulp-uglify": "^1.5.3",
-        "run-sequence": "^1.1.5"
+        "babel-core": "^6.25.0",
+        "babel-loader": "^7.1.1",
+        "babel-plugin-syntax-class-properties": "^6.13.0",
+        "babel-plugin-transform-ui5": "^6.1.2",
+        "babel-polyfill": "^6.23.0",
+        "babel-preset-env": "^1.6.0",
+        "webpack": "^3.4.1"
     }
     ...
 }
 ```
-If you don't, please execute the following commands.
+
 ```
-$ npm install --save-dev babel-cli
-$ npm install --save-dev del gulp gulp-babel gulp-concat gulp-rename gulp-uglify run-sequence
-$ npm install --save-dev babel-preset-ui5
+$ npm install --save-dev babel-preset-transform-ui5 babel-plugin-syntax-class-properties
 ```
 
 ### 2. Configure .babelrc
-Add a `.babelrc` in your project root folder.
-```js
+Add `transform-ui5` to the `plugins` and pass the options to track the imports that should be transformed.
+```json
 {
-    sourceRoot: "./src",
-    presets: [
-        "ui5"
+   "sourceRoot": "./",
+   "presets": [
+    [
+      "env",
+      {
+        "loose": true,
+        "modules": false
+      }
     ]
+  ],
+  "plugins": [
+    "syntax-class-properties",
+    ["transform-ui5", { "libs": ["^sap", "^jquery"], "files": ["app/controller", "app/model"] }]
+  ]
 }
+
 ```
+
 > The `sourceRoot` property can helps the plugin to output the right namespace.
 
-### 3. Configure gulpfile.js
+### 3. Configure webpack.config.js
 Add a `gulpfile.js` in your project root folder.
 ```js
-const babel = require("gulp-babel");
-const concat = require("gulp-concat");
-const del = require("del");
-const gulp = require("gulp");
-const rename = require("gulp-rename");
-const runSequence = require("run-sequence");
-const uglify = require("gulp-uglify");
-
-const SRC_ROOT = "./src";
-const ASSETS_ROOT = "./assets";
-
-gulp.task("default", [ "build" ]);
-
-gulp.task("clean", cb => {
-    del(`${ASSETS_ROOT}`).then(() => {
-        cb()
-    }, reason => {
-        cb(reason);
-    });
-});
-
-gulp.task("build", [ "clean" ], cb => {
-    runSequence(
-        "build-js",
-        "concat-js",
-        "uglify-js"
-        cb
-    );
-});
-
-gulp.task("build-js", () => {
-    return gulp.src(`${SRC_ROOT}/**/*.js`)
-        .pipe(babel())
-        .pipe(gulp.dest(`${ASSETS_ROOT}`));
-});
-
-gulp.task("concat-js", () => {
-    return gulp.src(`${ASSETS_ROOT}/**/*.js`)
-        .pipe(concat("all-dbg.js"))
-        .pipe(gulp.dest(`${ASSETS_ROOT}`));
-});
-
-gulp.task("uglify-js", () => {
-    return gulp.src(`${ASSETS_ROOT}/all-dbg.js`)
-        .pipe(uglify())
-        .pipe(rename(path => {
-            path.basename = "all";
-        }))
-        .pipe(gulp.dest(`${ASSETS_ROOT}`));
-});
+module.exports = {
+  entry: {
+    'Component': ['babel-polyfill', path.resolve(__dirname, 'app/Component.mjs')],
+    'test/unit/allTests': ['babel-polyfill', path.resolve(__dirname, 'app/test/unit/allTests.mjs')]
+  },
+  output: {
+    path: path.resolve(__dirname, 'app/'),
+    filename: '[name].js'
+  },
+  // devtool: 'cheap-module-eval-source-map',
+  module: {
+    rules: [
+      {
+        test: /\.m?js$/,
+        exclude: /node_modules/,
+        loaders: [
+          'babel-loader'
+        ]
+      }
+    ]
+  }
+};
 ```
 
 ### 4. Build with Webpack
-Please take a look at [ui5-loader](https://github.com/MagicCube/ui5-loader);
 
-
-## Modulization
-SAP UI5 supports Modulization through a mechanism called `library`. With my another
-Gulp plugin [gulp-ui5-lib](https://github.com/MagicCube/gulp-ui5-lib), you're
-now able to compile hundreds of JavaScript files into just one library preload
-JSON file.
-
-Please also take a look at [babel-plugin-ui5-example](https://github.com/MagicCube/babel-plugin-ui5-example),
-you'll find the answer.
 
 
 ## Example
-To get the full project example, please visit [babel-plugin-ui5-example](https://github.com/MagicCube/babel-plugin-ui5-example).
+Please also take a look at [example](https://github.com/sergiirocks/babel-plugin-transform-ui5/tree/master/example),
+you'll find the answer.
+
+
+## Compilation
 
 ### ES6 Codes
 ``` javascript
 /*---------------------------------*
- * File: src/example/obj/Animal.js *
+ * File: app/Component.mjs *
  *---------------------------------*/
 
-import ManagedObject from "sap/ui/base/ManagedObject";
+import UIComponent from 'sap/ui/core/UIComponent';
+import AppController from './controller/App';
 
-export default class Animal extends ManagedObject
-{
-    metadata: {
-        properties: {
-            type: { type: "string" },
-            nickName: { type: "string" }
-        }
-    }
+export default class Component extends UIComponent {
 
-    constructor(...args)
-    {
-        super(...args);
-        // TODO: Add your own construction code here.
-    }
+  metadata = { manifest: 'json' }
 
-    init()
-    {
-        // TODO: Add your own initialization code here.
-	}
+  init(...args) {
+    UIComponent.prototype.init.call(this, ...args);
+  }
 
-    callMe()
-    {
-        alert(`I'm a ${this.getType()}.
-        Call me ${this.getNickName()}.`);
-    }
 }
-
 
 
 /*---------------------------------*
- * File: src/example/obj/Cat.js *
+ * File: app/controller/App.js *
  *---------------------------------*/
-import Animal from "./Animal";
+import Controller from 'sap/ui/core/mvc/Controller';
+import { setModel, dispatch } from '../store';
 
-export default class Cat extends Animal
-{
-    init()
-    {
-        super.init();
-        this.setType("Cat");
-    }
+export default class AppController extends Controller {
 
-    callMe()
-    {
-        super.callMe();
-        alert("Miao~");
-    }
+  onInit() {
+    setModel(this);
+  }
 
-    static createCat(nickName)
-    {
-        const cat = new example.obj.Cat({
-            nickName
-        });
-        return cat;
-    }
+  onHelloWorldClick() {
+    dispatch('exampleButtonClick')
+  }
+
 }
+
+/*---------------------------------*
+ * File: app/store/index.js *
+ *---------------------------------*/
+import * as actions from './actions';
+import JSONModel from 'sap/ui/model/json/JSONModel';
+
+let state = null;
+
+export function getState() {
+  if (!state) {
+    state = new JSONModel({
+      app: {
+        value: 0,
+      }
+    });
+  }
+
+  return state;
+}
+
+export function setModel(controller) {
+  controller.getView().setModel(getState());
+}
+
+export async function dispatch(actionName, ...payload) {
+  if (!actions[actionName]) {
+    return console.error(`"${actionName}" is not registered!`);
+  }
+
+  try {
+    return actions[actionName]({ state, dispatch }, ...payload);
+  } catch (err) {
+    console.error(`Error during dispatch of '${actionName}'`, err);
+  }
+}
+
 ```
 
 ## Compiled Codes
 ``` javascript
 /*------------------------------------*
- * File: assets/example/obj/Animal.js *
+ * File: app/Component.mjs *
  *------------------------------------*/
-sap.ui.define(["sap/ui/base/ManagedObject"], function (ManagedObject) {
-    "use strict";
+import './controller/App';
 
-    return ManagedObject.extend("example.obj.Animal", {
-        metadata: {
-            properties: {
-                type: { type: "string" },
-                nickName: { type: "string" }
-            }
-    },
-    constructor: function constructor() {
-        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-            args[_key] = arguments[_key];
-        }
-
-        ManagedObject.apply(this, [].concat(args));
-        // TODO: Add your own construction code here.
-    },
-    init: function init() {
-        // TODO: Add your own initialization code here.
-    },
-    callMe: function callMe() {
-        alert("I'm a " + this.getType() + ". Call me " + this.getNickName() + ".");
+var UIComponent;
+var AppController;
+sap.ui.define('app/Component', ['sap/ui/core/UIComponent', 'app/controller/App'], function (_UIComponent, _AppController) {
+  UIComponent = _UIComponent
+  AppController = _AppController
+  return UIComponent.extend('app.Component', {
+    metadata: { manifest: 'json' },
+    init: function (...args) {
+      UIComponent.prototype.init.call(this, ...args);
     }
   });
 });
 
-
 /*---------------------------------*
- * File: assets/example/obj/Cat.js *
+ * File: app/controller/App.js *
  *---------------------------------*/
-sap.ui.define(["./Animal"], function (Animal) {
-    "use strict";
+import { setModel, dispatch } from '../store';
 
-    return Animal.extend("example.obj.Cat", {
-        init: function init() {
-            Animal.prototype.init.apply(this, []);
-            this.setType("Cat");
-        },
-        callMe: function callMe() {
-            Animal.prototype.callMe.apply(this, []);
-            alert("Miao~");
-        }
-    });
+var Controller;
+sap.ui.define('app/controller/App', ['sap/ui/core/mvc/Controller'], function (_Controller) {
+  Controller = _Controller
+  return Controller.extend('app.controller.AppController', {
+    onInit: function () {
+      setModel(this);
+    },
+    onHelloWorldClick: function () {
+      dispatch('exampleButtonClick');
+    }
+  });
 });
 
-example.obj.Cat.createCat = function (nickName) {
-    "use strict";
+/*---------------------------------*
+ * File: app/store/index.js *
+ *---------------------------------*/
+import * as actions from './actions';
+var JSONModel;
+sap.ui.define('app/store/index', ['sap/ui/model/json/JSONModel'], function (_JSONModel) {
+  JSONModel = _JSONModel
+});
 
-    var cat = new example.obj.Cat({
-        nickName: nickName
+let state = null;
+
+export function getState() {
+  if (!state) {
+    state = new JSONModel({
+      app: {
+        value: 0,
+      }
     });
-    return cat;
-};
+  }
 
+  return state;
+}
+
+export function setModel(controller) {
+  controller.getView().setModel(getState());
+}
+
+export async function dispatch(actionName, ...payload) {
+  ...
+}
 ```
 
-### Full example
-To get the full project example, please visit [babel-plugin-ui5-example](https://github.com/MagicCube/babel-plugin-ui5-example).
+

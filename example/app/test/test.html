@@ -1,0 +1,77 @@
+<html>
+<head>
+  <title>Bulletin Board</title>
+
+  <!--  try to load the basic UI5 styles for standalone and demokit usecase -->
+  <link rel="stylesheet" href="https://openui5.hana.ondemand.com/resources/sap/ui/core/themes/sap_belize/library.css">
+  <link rel="stylesheet"
+        href="https://openui5.hana.ondemand.com/resources/sap/ui/core/themes/sap_belize/library.css">
+
+  <script type="text/javascript">
+    var w = window;
+    if (w.performance || w.mozPerformance || w.msPerformance || w.webkitPerformance) {
+      var d = document, AKSB = AKSB || {};
+      AKSB.q = [];
+      AKSB.mark = function(a, b) {
+        AKSB.q.push(["mark", a, b || (new Date).getTime()])
+      };
+      AKSB.measure = function(a, b, c) {
+        AKSB.q.push(["measure", a, b, c || (new Date).getTime()])
+      };
+      AKSB.done = function(a) {
+        AKSB.q.push(["done", a])
+      };
+      AKSB.mark("firstbyte", (new Date).getTime());
+      AKSB.prof = {
+        custid: "333580",
+        ustr: "",
+        originlat: 0,
+        clientrtt: 29,
+        ghostip: "104.121.151.37",
+        ipv6: false,
+        pct: 10,
+        clientip: "80.146.228.119",
+        requestid: "3483367e",
+        region: "27587",
+        protocol: "",
+        blver: 11,
+        akM: "x",
+        akN: "ae",
+        akTT: "O",
+        akTX: "1",
+        akTI: "3483367e",
+        ai: "218006",
+        ra: "",
+        pmgn: "",
+        pmgi: "",
+        pmp: ""
+      };
+      (function(a) {
+        var b = d.createElement("script");
+        b.async = "async";
+        b.src = a;
+        a = d.getElementsByTagName("script");
+        a = a[a.length - 1];
+        a.parentNode.insertBefore(b, a)
+      })(("https:" === d.location.protocol ? "https:" : "http:") + "//ds-aksb-a.akamaihd.net/aksb.min.js")
+    }
+  </script>
+</head>
+<body class="sapUiBody sapUiMediumMargin sapUiForceWidthAuto">
+<h1>Bulletin Board</h1>
+
+<p>In this sample app for the testing tutorial we will test application functionality with QUnit, OPA5, and the mock
+  server</p>
+
+<h2>Standalone</h2>
+These files can be used to run the application as a standalone application in the SAP Web IDE or after building and
+serving with bower/grunt (expects a UI5 installation available at the server root, so this will not work without this
+build and the grunt-based server).
+<ul>
+  <li><a href="mockServer.html">mockServer.html</a> - start the app with mock data</li>
+  <li><a href="unit/unitTests.qunit.html">unit/unitTests.qunit.html</a> - run all unit tests</li>
+  <li><a href="integration/opaTests.qunit.html">integration/opaTests.qunit.html</a> - run all integration tests</li>
+</ul>
+<p>For more documentation please read the <a href="https://openui5.hana.ondemand.com">UI5 Developer Guide</a>.</p>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "parserOptions": {
+    "ecmaVersion": 8,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "impliedStrict": true
+    }
+  },
+  "env": {
+    "node": false,
+    "browser": true,
+    "es6": true
+  },
+  "globals": {
+    "sap": true,
+    "QUnit": true,
+    "jQuery": true
+  },
+  "rules": {
+    "block-scoped-var": "error",
+    "quotes": ["error", "single", { "avoidEscape": true, "allowTemplateLiterals": true }]
+  }
+}

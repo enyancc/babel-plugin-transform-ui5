@@ -1,0 +1,14 @@
+<mvc:View
+        controllerName="app.controller.AppController"
+        xmlns="sap.m"
+        xmlns:l="sap.ui.layout"
+        height="100%"
+        xmlns:mvc="sap.ui.core.mvc">
+    <Page showHeader="false" busy="{tree>/Busy}" busyIndicatorDelay="0.3">
+        <content>
+            <Button text="Hello World" press="onHelloWorldClick"/>
+            <Text text="{/app/value}" />
+        </content>
+
+    </Page>
+</mvc:View>

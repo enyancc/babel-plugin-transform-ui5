@@ -1,0 +1,15 @@
+{
+  "presets": [
+    [
+      "env",
+      {
+        "loose": true,
+        "modules": false
+      }
+    ]
+  ],
+  "plugins": [
+    "syntax-class-properties",
+    ["transform-ui5", { "libs": ["^sap", "^jquery"], "files": ["app/controller", "app/model"] }]
+  ]
+}
